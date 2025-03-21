@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name,missing-docstring
+# pylint: disable=invalid-name, missing-docstring, fixme
 import json
 import random
 from collections import Counter, defaultdict
@@ -112,10 +112,13 @@ class Generator:
         self.fixed_random_order = list(range(self.n_nodes))
         random.shuffle(self.fixed_random_order)
 
+        self.G = None
+        self.all_nodes = None
+
     def init_graph(self):
         self.G = nx.Graph()
-        # self.node_to_com = {}
         self.all_nodes = []
+        # self.node_to_com = {}
         for idnode in range(self.n_nodes):
             name = self.new_name()
             community = self.community_array[idnode]
@@ -130,7 +133,7 @@ class Generator:
     def run(self, order_strat="random"):
         self.init_graph()
 
-        for hedge in range(self.n_hedges):
+        for _ in range(self.n_hedges):
             nodes = list(range(self.n_nodes))
             # random.shuffle(nodes)
 
@@ -249,7 +252,7 @@ class Generator:
     def run_fixed_size(self, node, hyperedge, nodes):
         hyperedge_created = False
         hyperedge_size = 1
-        for i, node2 in enumerate(nodes):
+        for _, node2 in enumerate(nodes):
             if node != node2:
                 com1 = self.community_array[node]
                 com2 = self.community_array[node2]
@@ -332,7 +335,7 @@ class Generator:
         ]:
             nodes = self.G[hedge]
 
-            #             TODO: for now, remove empty hes
+            # TODO: for now, remove empty hes
             if len(nodes) == 0:
                 continue
 
@@ -344,8 +347,8 @@ class Generator:
                     count[i] = 0
 
             gini = 0
-            for i, (n_com, count_value) in enumerate(count.items()):
-                for j, (n_com2, count_value2) in enumerate(count.items()):
+            for i, (_, count_value) in enumerate(count.items()):
+                for _, (_, count_value2) in enumerate(count.items()):
                     # if j > i:
                     gini += abs(count_value - count_value2)
 
@@ -382,7 +385,7 @@ class Generator:
 
             # Avoid division by 0 later
             coms = sorted([com + 1 for com in coms])
-            count = Counter(coms)
+            _ = Counter(coms)
 
             t0 = 0
             t1 = 0
