@@ -16,4 +16,11 @@ dependencies = [
     "scipy>=1.15.2",
     "statsmodels>=0.14.4",
     "yapf>=0.43.0",
+    "generator_v2",
 ]
+
+[tool.uv.sources]
+generator_v2 = { workspace = true }
+
+[tool.uv.workspace]
+members = ["packages/generator_v2"]

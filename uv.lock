@@ -2,6 +2,12 @@ version = 1
 revision = 1
 requires-python = ">=3.12"
 
+[manifest]
+members = [
+    "generator-v2",
+    "hysbm",
+]
+
 [[package]]
 name = "altair"
 version = "5.5.0"
@@ -440,6 +446,11 @@ wheels = [
 ]
 
 [[package]]
+name = "generator-v2"
+version = "0.1.0"
+source = { editable = "packages/generator_v2" }
+
+[[package]]
 name = "h11"
 version = "0.14.0"
 source = { registry = "https://pypi.org/simple" }
@@ -483,6 +494,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "altair" },
     { name = "distfit" },
+    { name = "generator-v2" },
     { name = "ipykernel" },
     { name = "ipython" },
     { name = "isort" },
@@ -498,6 +510,7 @@ dependencies = [
 requires-dist = [
     { name = "altair", specifier = ">=5.5.0" },
     { name = "distfit", specifier = ">=1.8.0" },
+    { name = "generator-v2", editable = "packages/generator_v2" },
     { name = "ipykernel", specifier = ">=6.29.5" },
     { name = "ipython", specifier = ">=9.0.2" },
     { name = "isort", specifier = ">=6.0.1" },
