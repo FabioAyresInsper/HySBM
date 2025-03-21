@@ -1,56 +1,70 @@
-import networkx as nx
-import random
+# pylint: disable=invalid-name,missing-docstring
 import json
-from collections import defaultdict, Counter
+import random
+from collections import Counter, defaultdict
 
-# This version has as parameters the number of nodes but also the number of hyperedges, so when p = q, we go back to the simple hypergraph random model
+import networkx as nx
 
-
+# This version has as parameters the number of nodes but also the number of
+# hyperedges, so when p = q, we go back to the simple hypergraph random model.
 
 # Sample list of animal names
 animal_names = [
-    "cat", "dog", "elephant", "giraffe", "lion", "tiger", "panda", "koala", "kangaroo",
-    "zebra", "hippo", "bear", "wolf", "fox", "rhino", "cheetah", "penguin", "dolphin",
-    "whale", "shark", "eagle", "hawk", "falcon", "owl", "sparrow", "hummingbird", "parrot",
-    "peacock", "duck", "swan", "goose", "rabbit", "squirrel", "deer", "moose", "gazelle",
-    "monkey", "gorilla", "chimpanzee", "orangutan", "lemur", "hyena", "leopard", "panther",
-    "crocodile", "alligator", "snake", "turtle", "frog", "lizard", "octopus", "squid", "crab",
-    "lobster", "shrimp", "starfish", "jellyfish", "seahorse", "snail", "butterfly", "bee",
-    "ant", "beetle", "ladybug", "spider", "scorpion", "tarantula", "hedgehog", "armadillo",
-    "platypus", "kookaburra", "emu", "wombat", "tasmanian devil", "kiwi", "ostrich", "rhinoceros beetle",
-    "buffalo", "moose", "raccoon", "skunk", "porcupine", "hedgehog", "polar bear", "walrus",
-    "seal", "otters", "sloth", "anteater", "aardvark", "reindeer", "antelope", "caribou",
-    "yak", "gnu", "hippopotamus", "hyena", "jackal", "elephant seal", "meerkat", "armadillo",
-    "black bear", "chinchilla", "fennec fox", "lynx", "jaguar", "quokka", "tarsier", "anteater",
-    "capybara", "okapi", "lemur", "leopard", "manatee", "numbat", "pangolin", "red panda",
-    "serval", "tapir", "bongo", "bongo", "fossa", "gibbon", "saki monkey", "tit", "toucan",
-    "star-nosed mole", "springhare", "armadillo girdled lizard", "numbat", "sugar glider", "wallaroo",
-    "red-handed tamarin", "green basilisk", "glass frog", "flying dragon", "pufferfish", "blowfish",
-    "lionfish", "scorpionfish", "mandarin fish", "blue tang", "parrotfish", "yellow tang",
-    "flounder", "swordfish", "goblin shark", "hammerhead shark", "bull shark", "mako shark",
-    "giant manta ray", "stingray", "sea turtle", "leatherback turtle", "box turtle",
-    "green sea turtle", "giant panda", "red fox", "sea otter", "jaguar", "siberian tiger",
-    "bald eagle", "harpy eagle", "humpback whale", "blue whale", "orca", "bottlenose dolphin",
-    "gray wolf", "golden eagle", "african elephant", "indian elephant", "saltwater crocodile",
-    "american alligator", "black rhinoceros", "white rhinoceros", "black mamba", "king cobra",
-    "reticulated python", "green anaconda", "nile crocodile", "poison dart frog",
-    "giant african millipede", "giant centipede", "tarantula", "giant desert hairy scorpion",
-    "black widow spider", "african lion", "cheetah", "leopard", "giraffe", "african elephant",
-    "grizzly bear", "polar bear", "red kangaroo", "blue whale", "bengal tiger", "siberian tiger",
-    "american bison", "american flamingo", "african penguin", "african grey parrot",
-    "green tree python", "chimpanzee", "koala", "arctic fox", "snow leopard", "red panda",
-    "sloth", "raccoon", "meerkat", "black-footed ferret", "beaver", "giant panda", "honey badger",
-    "prairie dog", "sea lion", "walrus", "gray whale", "elephant seal", "macaw", "scarlet macaw",
-    "cockatoo", "hummingbird", "woodpecker", "kingfisher", "puffin", "hornbill", "horned owl",
-    "barn owl", "peregrine falcon", "osprey", "buzzard", "red-tailed hawk", "harpy eagle",
-    "bald eagle", "bearded vulture", "black vulture", "turkey vulture", "pheasant", "quail",
-    "partridge", "guinea fowl", "dove", "pigeon", "stork", "crane", "flamingo", "pelican",
-    "swan", "goose", "duck", "heron", "ibis", "egret", "spoonbill", "albatross", "seagull",
-    "tern", "frigatebird", "penguin", "ostrich", "emu", "kiwi", "cassowary", "rhea", "toad",
-    "frog", "salamander", "newt", "caecilian", "crocodile", "alligator", "gavial", "iguana",
-    "chameleon", "komodo dragon", "gecko", "monitor lizard", "skink", "cobra", "viper",
-    "rattlesnake", "black mamba", "king cobra", "anaconda", "python", "boa constrictor",
-    "sea snake", "grass snake", "water snake", "garter snake", "hognose snake", "milk snake"]
+    "cat", "dog", "elephant", "giraffe", "lion", "tiger", "panda", "koala",
+    "kangaroo", "zebra", "hippo", "bear", "wolf", "fox", "rhino", "cheetah",
+    "penguin", "dolphin", "whale", "shark", "eagle", "hawk", "falcon", "owl",
+    "sparrow", "hummingbird", "parrot", "peacock", "duck", "swan", "goose",
+    "rabbit", "squirrel", "deer", "moose", "gazelle", "monkey", "gorilla",
+    "chimpanzee", "orangutan", "lemur", "hyena", "leopard", "panther",
+    "crocodile", "alligator", "snake", "turtle", "frog", "lizard", "octopus",
+    "squid", "crab", "lobster", "shrimp", "starfish", "jellyfish", "seahorse",
+    "snail", "butterfly", "bee", "ant", "beetle", "ladybug", "spider",
+    "scorpion", "tarantula", "hedgehog", "armadillo", "platypus", "kookaburra",
+    "emu", "wombat", "tasmanian devil", "kiwi", "ostrich", "rhinoceros beetle",
+    "buffalo", "moose", "raccoon", "skunk", "porcupine", "hedgehog",
+    "polar bear", "walrus", "seal", "otters", "sloth", "anteater", "aardvark",
+    "reindeer", "antelope", "caribou", "yak", "gnu", "hippopotamus", "hyena",
+    "jackal", "elephant seal", "meerkat", "armadillo", "black bear",
+    "chinchilla", "fennec fox", "lynx", "jaguar", "quokka", "tarsier",
+    "anteater", "capybara", "okapi", "lemur", "leopard", "manatee", "numbat",
+    "pangolin", "red panda", "serval", "tapir", "bongo", "bongo", "fossa",
+    "gibbon", "saki monkey", "tit", "toucan", "star-nosed mole", "springhare",
+    "armadillo girdled lizard", "numbat", "sugar glider", "wallaroo",
+    "red-handed tamarin", "green basilisk", "glass frog", "flying dragon",
+    "pufferfish", "blowfish", "lionfish", "scorpionfish", "mandarin fish",
+    "blue tang", "parrotfish", "yellow tang", "flounder", "swordfish",
+    "goblin shark", "hammerhead shark", "bull shark", "mako shark",
+    "giant manta ray", "stingray", "sea turtle", "leatherback turtle",
+    "box turtle", "green sea turtle", "giant panda", "red fox", "sea otter",
+    "jaguar", "siberian tiger", "bald eagle", "harpy eagle", "humpback whale",
+    "blue whale", "orca", "bottlenose dolphin", "gray wolf", "golden eagle",
+    "african elephant", "indian elephant", "saltwater crocodile",
+    "american alligator", "black rhinoceros", "white rhinoceros", "black mamba",
+    "king cobra", "reticulated python", "green anaconda", "nile crocodile",
+    "poison dart frog", "giant african millipede", "giant centipede",
+    "tarantula", "giant desert hairy scorpion", "black widow spider",
+    "african lion", "cheetah", "leopard", "giraffe", "african elephant",
+    "grizzly bear", "polar bear", "red kangaroo", "blue whale", "bengal tiger",
+    "siberian tiger", "american bison", "american flamingo", "african penguin",
+    "african grey parrot", "green tree python", "chimpanzee", "koala",
+    "arctic fox", "snow leopard", "red panda", "sloth", "raccoon", "meerkat",
+    "black-footed ferret", "beaver", "giant panda", "honey badger",
+    "prairie dog", "sea lion", "walrus", "gray whale", "elephant seal", "macaw",
+    "scarlet macaw", "cockatoo", "hummingbird", "woodpecker", "kingfisher",
+    "puffin", "hornbill", "horned owl", "barn owl", "peregrine falcon",
+    "osprey", "buzzard", "red-tailed hawk", "harpy eagle", "bald eagle",
+    "bearded vulture", "black vulture", "turkey vulture", "pheasant", "quail",
+    "partridge", "guinea fowl", "dove", "pigeon", "stork", "crane", "flamingo",
+    "pelican", "swan", "goose", "duck", "heron", "ibis", "egret", "spoonbill",
+    "albatross", "seagull", "tern", "frigatebird", "penguin", "ostrich", "emu",
+    "kiwi", "cassowary", "rhea", "toad", "frog", "salamander", "newt",
+    "caecilian", "crocodile", "alligator", "gavial", "iguana", "chameleon",
+    "komodo dragon", "gecko", "monitor lizard", "skink", "cobra", "viper",
+    "rattlesnake", "black mamba", "king cobra", "anaconda", "python",
+    "boa constrictor", "sea snake", "grass snake", "water snake",
+    "garter snake", "hognose snake", "milk snake"
+]
+
 
 def name_generator():
     random_animal = random.sample(animal_names, 1)[0]
@@ -60,7 +74,17 @@ def name_generator():
 
 
 class Generator:
-    def __init__(self, n_nodes: int = 100, n_hedges=100, n_coms=None, p_edge_intra: float = 0.20, p_edge_inter: float = 0.02, community_array: list[int] or None = None, sampling_strat="weighted"):
+
+    def __init__(
+        self,
+        n_nodes: int = 100,
+        n_hedges=100,
+        n_coms=None,
+        p_edge_intra: float = 0.20,
+        p_edge_inter: float = 0.02,
+        community_array: list[int] or None = None,
+        sampling_strat="weighted",
+    ):
         self.n_nodes = n_nodes
         self.n_hedges = n_hedges if n_hedges else self.n_nodes
         self.n_coms = n_coms
@@ -95,7 +119,12 @@ class Generator:
         for idnode in range(self.n_nodes):
             name = self.new_name()
             community = self.community_array[idnode]
-            self.G.add_node("p" + str(idnode), type=self.node_type, name=name, community=community)
+            self.G.add_node(
+                "p" + str(idnode),
+                type=self.node_type,
+                name=name,
+                community=community,
+            )
 
     # O(n + m + m * n)
     def run(self, order_strat="random"):
@@ -110,14 +139,15 @@ class Generator:
                     random.shuffle(nodes)
                 case "community-order":
                     # Nodes are grouped by their community
-                    nodes = nodes
+                    # nodes = nodes
+                    pass
                 case "fixed":
                     nodes = self.fixed_random_order
 
             # hyperedge = []
             first_node = random.choice(nodes)
             hyperedge = [first_node]
-            
+
             for node in nodes:
                 # add first node encountered in hyperedge for random order.
                 # if order_strat == "random" and len(hyperedge) == 0:
@@ -139,7 +169,7 @@ class Generator:
             if roll < proba:
                 hyperedge.append(node)
             return
-        
+
         if self.sampling_start == "first":
             self.add_node_firstproba(node, hyperedge)
         elif self.sampling_start == "weighted":
@@ -169,12 +199,13 @@ class Generator:
             p = self.p_edge_intra if com == com2 else self.p_edge_inter
             sum_p += p
         weighted_proba = sum_p / len(hyperedge)
-        
+
         roll = random.random()
         if roll < weighted_proba:
             hyperedge.append(node)
 
     def add_node_mostfrequent_proba(self, node, hyperedge):
+
         def most_frequent(List):
             return max(set(List), key=List.count)
 
@@ -242,22 +273,31 @@ class Generator:
         return hyperedge
 
     def degrees(self):
-        nodes =  [node for node, attr in self.G.nodes(data=True) if attr["type"] == self.node_type]
+        nodes = [
+            node for node, attr in self.G.nodes(data=True)
+            if attr["type"] == self.node_type
+        ]
         degrees = self.G.degree(nodes)
         return degrees
 
     def hyperedge_sizes(self):
-        hedges =  [node for node, attr in self.G.nodes(data=True) if attr["type"] == self.hyperedge_type]
+        hedges = [
+            node for node, attr in self.G.nodes(data=True)
+            if attr["type"] == self.hyperedge_type
+        ]
         degrees = self.G.degree(hedges)
         return degrees
 
     def hyperedges_composition(self):
         hedges_comp = []
-        for hedge in [node for node, attr in self.G.nodes(data=True) if attr["type"] == self.hyperedge_type]:
+        for hedge in [
+                node for node, attr in self.G.nodes(data=True)
+                if attr["type"] == self.hyperedge_type
+        ]:
             nodes = self.G[hedge]
             if len(nodes) == 0:
                 continue
-            
+
             coms = [self.G.nodes[n]["community"] for n in nodes]
             hedges_comp.append(coms)
         return hedges_comp
@@ -265,13 +305,16 @@ class Generator:
     # (max(n1, n2) / n1 + n2)
     def hyperedges_nmax(self):
         values = []
-        for hedge in [node for node, attr in self.G.nodes(data=True) if attr["type"] == self.hyperedge_type]:
+        for hedge in [
+                node for node, attr in self.G.nodes(data=True)
+                if attr["type"] == self.hyperedge_type
+        ]:
             nodes = self.G[hedge]
-            
-#             TODO: for now, remove empty hes
+
+            # TODO: for now, remove empty hes
             if len(nodes) == 0:
-                continue 
-            
+                continue
+
             coms = [self.G.nodes[n]["community"] for n in nodes]
             maxOccurrence = max(coms, key=coms.count)
             count = Counter(coms)
@@ -281,16 +324,18 @@ class Generator:
             values.append(value)
         return values
 
-
     def ginis(self):
         ginis = []
-        for hedge in [node for node, attr in self.G.nodes(data=True) if attr["type"] == self.hyperedge_type]:
+        for hedge in [
+                node for node, attr in self.G.nodes(data=True)
+                if attr["type"] == self.hyperedge_type
+        ]:
             nodes = self.G[hedge]
-            
-#             TODO: for now, remove empty hes
+
+            #             TODO: for now, remove empty hes
             if len(nodes) == 0:
-                continue 
-            
+                continue
+
             coms = [self.G.nodes[n]["community"] for n in nodes]
             count = Counter(coms)
 
@@ -302,7 +347,7 @@ class Generator:
             for i, (n_com, count_value) in enumerate(count.items()):
                 for j, (n_com2, count_value2) in enumerate(count.items()):
                     # if j > i:
-                        gini += abs(count_value - count_value2)
+                    gini += abs(count_value - count_value2)
 
             xbar = 0
             for nc in count.values():
@@ -312,8 +357,8 @@ class Generator:
             # gini = gini / ((self.n_coms ** 2) * xbar)
             # gini_norm = gini / ((self.n_coms - 1) / self.n_coms)
 
-            gini = gini / (2 * (self.n_coms ** 2) * xbar)
-            gini_norm = gini / (1 - 1/self.n_coms)
+            gini = gini / (2 * (self.n_coms**2) * xbar)
+            gini_norm = gini / (1 - 1 / self.n_coms)
 
             ginis.append(gini_norm)
             # ginis.append(gini)
@@ -324,7 +369,10 @@ class Generator:
 
     def ginis2(self):
         ginis = []
-        for hedge in [node for node, attr in self.G.nodes(data=True) if attr["type"] == self.hyperedge_type]:
+        for hedge in [
+                node for node, attr in self.G.nodes(data=True)
+                if attr["type"] == self.hyperedge_type
+        ]:
             nodes = self.G[hedge]
 
             if len(nodes) == 0:
@@ -350,7 +398,6 @@ class Generator:
 
         return ginis
 
-
     def mixed_he_fraction_to_count(self):
         edges_composition = self.hyperedges_composition()
         fraction_to_count = defaultdict(int)
@@ -360,11 +407,12 @@ class Generator:
             fraction_to_count[fraction] += 1
         return fraction_to_count
 
-
-
     def hyperedges_types(self):
         hedges_comp = []
-        for hedge in [node for node, attr in self.G.nodes(data=True) if attr["type"] == self.hyperedge_type]:
+        for hedge in [
+                node for node, attr in self.G.nodes(data=True)
+                if attr["type"] == self.hyperedge_type
+        ]:
             nodes = self.G[hedge]
             coms = [self.G.nodes[n]["community"] for n in nodes]
             coms_set = set(coms)
@@ -373,7 +421,6 @@ class Generator:
             else:
                 hedges_comp.append("mixed")
         return hedges_comp
-
 
     def new_name(self):
         name = name_generator()
@@ -409,14 +456,17 @@ class Generator:
     def export(self):
         self.ginis()
 
-        fp = f"hypergraphs_v2/{self.n_nodes}nodes_{self.p_edge_intra}p_{self.p_edge_inter}q_{self.sampling_start}.json"
-        with open(fp, "w+") as path:
+        fp = (f"hypergraphs_v2/{self.n_nodes}nodes_{self.p_edge_intra}"
+              f"p_{self.p_edge_inter}q_{self.sampling_start}.json")
+
+        with open(fp, "w+", encoding="utf8") as path:
             json.dump(self.to_json(), path)
 
-        with open("output.json", "w+") as path:
+        with open("output.json", "w+", encoding="utf8") as path:
             json.dump(self.to_json(), path)
 
-if __name__ == "__main__":
+
+def main():
     RUN_SIM = False
 
     if RUN_SIM:
@@ -432,16 +482,16 @@ if __name__ == "__main__":
                 gen.run()
                 gen.export()
 
-
     # for q in [0.02, 0.005, 0.002, 0]:
     for q in [0.05, 0.02, 0.005, 0]:
         gen = Generator(80, 80, 4, 0.05, q, None, "frequent")
         gen.run()
         gen.export()
 
-
     # types = gen.hyperedges_types()
     # print(types)
     # print(gen.G)
 
 
+if __name__ == "__main__":
+    main()

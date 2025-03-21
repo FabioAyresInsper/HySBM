@@ -1,0 +1,19 @@
+[project]
+name = "hysbm"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "altair>=5.5.0",
+    "distfit>=1.8.0",
+    "ipykernel>=6.29.5",
+    "ipython>=9.0.2",
+    "isort>=6.0.1",
+    "jupyter>=1.1.1",
+    "networkx>=3.4.2",
+    "pylint>=3.3.6",
+    "scipy>=1.15.2",
+    "statsmodels>=0.14.4",
+    "yapf>=0.43.0",
+]
